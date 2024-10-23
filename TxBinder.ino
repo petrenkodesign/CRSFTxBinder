@@ -116,19 +116,16 @@ void loop()
   } else if (lcdbtn < 200) { // up
       btn_release();
       channels[2] += 10;
-      status = "Throttle UP     ";
-      DEBUG.println(channels[2]);
+      sprintf(status, "ThrtUP: %u   ", channels[2]);
   } else if (lcdbtn < 400) { // down
       btn_release();
       channels[2] -= 10;
-      status = "Throttle Down   ";
-      DEBUG.println(channels[2]);
+      sprintf(status, "ThrtDW: %u   ", channels[2]);
   } else if (lcdbtn < 600) { // left
       status ="Left           ";
   } else if (lcdbtn < 800) { // select
       btn_release();
       channels[9] = (channels[9]==992 || channels[9]==0) ? 172 : 992;
       status = (channels[9]==172) ? "ARM            " : "Disarm         ";
-      DEBUG.println(channels[9]);
   }
 }
