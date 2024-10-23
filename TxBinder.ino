@@ -2,7 +2,8 @@
 // more on https://github.com/crsf-wg/crsf/wiki
 
 #include <LiquidCrystal.h>
-LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
+#include <LCDKeypad.h>
+LCDKeypad lcd;
 
 #include <SoftwareSerial.h>
 SoftwareSerial TX(2, 3);
@@ -12,7 +13,6 @@ SoftwareSerial TX(2, 3);
 uint16_t channels[16] = {0};
 uint8_t crsf_packet[26];
 const char *status = "Press button...";
-int lcdbtn = 0;
 
 uint8_t _crc8(const uint8_t* data, size_t length) {
     uint8_t crc = 0;  // Initial CRC value
@@ -56,12 +56,6 @@ void ch2crsf(uint8_t packet[], int16_t channels[]) {
     packet[25] = _crc8(&packet[2], packet[1] - 1); // CRC
 }
 
-void btn_release() {
-  while(lcdbtn!=1023) {
-    lcdbtn = analogRead(0);
-  }
-}
-
 void setup()
 {
   DEBUG.begin(9600);
@@ -83,7 +77,6 @@ void setup()
 
 void loop()
 {
-  lcdbtn = analogRead(0);
   lcd.setCursor(0, 0);
   lcd.print("Hub Working >>>");
   lcd.setCursor(0, 1);
@@ -111,21 +104,26 @@ void loop()
   }
 
   // reading a shield keypad pressing
-  if (lcdbtn < 60) { // right
-      status = "Right           ";
-  } else if (lcdbtn < 200) { // up
-      btn_release();
-      channels[2] += 10;
-      sprintf(status, "ThrtUP: %u   ", channels[2]);
-  } else if (lcdbtn < 400) { // down
-      btn_release();
-      channels[2] -= 10;
-      sprintf(status, "ThrtDW: %u   ", channels[2]);
-  } else if (lcdbtn < 600) { // left
-      status ="Left           ";
-  } else if (lcdbtn < 800) { // select
-      btn_release();
+  switch (lcd.buttonBlocking()) {
+    case KEYPAD_LEFT:
+      channels[3] = ( channels[3] > 1810 ) ? 1811 : channels[3]+10;
+      sprintf(status, "Left : %u     ", channels[3]);
+      break;
+    case KEYPAD_RIGHT:
+      channels[3] = ( channels[3] < 180 ) ? 172 : channels[3]-10;
+      sprintf(status, "Right: %u     ", channels[3]);
+      break;
+    case KEYPAD_UP:
+      channels[2] = ( channels[2] > 1810 ) ? 1811 : channels[2]+10;
+      sprintf(status, "ThrtUP: %u     ", channels[2]);
+      break;
+    case KEYPAD_DOWN:
+      channels[2] = ( channels[2] < 180 ) ? 172 : channels[2]-10;
+      sprintf(status, "ThrtDW: %u     ", channels[2]);
+      break;
+    case KEYPAD_SELECT:
       channels[9] = (channels[9]==992 || channels[9]==0) ? 172 : 992;
-      status = (channels[9]==172) ? "ARM            " : "Disarm         ";
+      sprintf(status, (channels[9]==172) ? "ARM            " : "Disarm         ");
+      break;
   }
 }
