@@ -83,7 +83,7 @@ void loop()
   lcd.print(status);
   // preparing packets
   ch2crsf(crsf_packet, channels);
-  // sending data to ELRS TX
+  // sending data to ELRS TX, cyclic sending of the packet binds the devices
   TX.write(crsf_packet, 26);
 
   // read data from serial monitor
@@ -124,10 +124,6 @@ void loop()
     case KEYPAD_SELECT:
       channels[9] = (channels[9]==992 || channels[9]==0) ? 172 : 992;
       sprintf(status, (channels[9]==172) ? "ARM            " : "Disarm         ");
-      if(channels[9]==172) { // resets a control when drone arming
-        channels[0] = channels[1] = channels[3] = 992;
-        channels[2] = 172;
-      }
       break;
   }
 }
