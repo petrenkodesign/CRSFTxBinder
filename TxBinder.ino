@@ -124,6 +124,10 @@ void loop()
     case KEYPAD_SELECT:
       channels[9] = (channels[9]==992 || channels[9]==0) ? 172 : 992;
       sprintf(status, (channels[9]==172) ? "ARM            " : "Disarm         ");
+      if(channels[9]==172) { // resets a control when drone arming
+        channels[0] = channels[1] = channels[3] = 992;
+        channels[2] = 172;
+      }
       break;
   }
 }
